@@ -1,0 +1,22 @@
+global:
+  dnsAddress: #DNS_ADDRESS#
+  ipAddress: #IP_ADDRESS#
+  serviceDnsAddress: #API_DNS_ADDRESS#
+  serviceAddress: #API_DNS_ADDRESS#
+  upgradeServiceAddress: #DNS_ADDRESS#:30090
+  httpScheme: http
+  enableTls: false
+  hostAliases: 10.10.10.101
+  namespace: #NAMESPACE#
+  imagerepository:
+    operations: 
+  imagePullPolicy: IfNotPresent
+
+applicationPortal:
+  image: 
+  memoryLimit: 4G
+  memoryRequest: 100M
+  replicas: 1
+  enableDetailedStateOption: #ENABLE_DETAILED_STATE_OPTION#
+  enableSimulationFeatureOption: #ENABLE_SIMULATION_FEATURE_OPTION#
+  #UI_NODEPORT_KEY_VALUE#
