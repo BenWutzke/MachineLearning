@@ -3,7 +3,6 @@ import os
 import shutil
 import time
 import traceback
-import pickle
 
 from flask import Flask, request, jsonify
 import pandas as pd
@@ -12,11 +11,11 @@ from sklearn.externals import joblib
 app = Flask(__name__)
 
 # inputs
-training_data = 'data.csv'
-include = []
-dependent_variable = ''
+training_data = 'data/titanic.csv'
+include = ['Age', 'Sex', 'Embarked', 'Survived']
+dependent_variable = 'Survived'
 
-model_directory = './training/model'
+model_directory = 'model'
 model_file_name = f'{model_directory}/model.pkl'
 model_columns_file_name = f'{model_directory}/model_columns.pkl'
 
@@ -27,8 +26,6 @@ clf = None
 
 @app.route('/predict', methods=['POST']) # Create http://host:port/predict POST end point
 def predict():
-    with open(model_file_name) as f:
-        clf = pickle.load(f)
     if clf:
         try:
             json_ = request.json #capture the json from POST
@@ -75,7 +72,7 @@ def train():
     model_columns = list(x.columns)
     joblib.dump(model_columns, model_columns_file_name)
 
-    #global clf
+    global clf
     clf = rf()
     start = time.time()
     clf.fit(x, y)
@@ -90,7 +87,7 @@ def train():
 @app.route('/wipe', methods=['GET']) # Create http://host:port/wipe GET end point
 def wipe():
     try:
-        shutil.rmtree('models')
+        shutil.rmtree('model')
         os.makedirs(model_directory)
         return 'Model wiped'
 
