@@ -4,10 +4,11 @@ Created on Thu Jun  3 07:13:21 2021
 
 @author: voodo
 """
+import os
 import numpy as np
 import tensorflow as tf
-tf.config.threading.set_inter_op_parallelism_threads(10)
-tf.config.threading.set_intra_op_parallelism_threads(10)
+tf.config.threading.set_inter_op_parallelism_threads(15)
+tf.config.threading.set_intra_op_parallelism_threads(15)
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras import Sequential, Input, Model
 from tensorflow.keras.layers import Dense, Dropout, Flatten
@@ -73,7 +74,7 @@ train_X,valid_X,train_label,valid_label = train_test_split(train_X, train_Y_one_
 print("train: {}, validate: {}, train label: {}, validation label: {}".format(train_X.shape,valid_X.shape,train_label.shape,valid_label.shape))
 
 
-batch_size = 128 #128/256 -- memory dependent.
+batch_size = 128 #128/256 -- RAM dependent.
 epochs = 20
 num_classes = 10
 
@@ -109,16 +110,36 @@ test_model.compile(loss=tf.keras.losses.categorical_crossentropy, optimizer=tf.k
 #Summarize the model
 test_model.summary()
 
-#Train the model
-test_train = test_model.fit(train_X, train_label, batch_size=batch_size,epochs=epochs,verbose=1,validation_data=(valid_X, valid_label))
+#Train the model with checkpoints
+if not os.path.isdir("cnnCheck"):
+    os.mkdir("cnnCheck")
+cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath='cnnCheck',
+                                                 save_weights_only=True,
+                                                 verbose=1)
+
+test_train = test_model.fit(train_X, 
+                            train_label, 
+                            batch_size=batch_size,
+                            epochs=epochs,
+                            verbose=1,
+                            validation_data=(valid_X, valid_label),
+                            callbacks=[cp_callback])
+
+
 
 #model evaluation on test
 test_eval = test_model.evaluate(test_X, test_Y_one_hot, verbose=0)
 print('Test loss:', test_eval[0])
 print('Test accuracy:', test_eval[1])
 
+#Save the model with the train and test values
+if not os.path.isdir("cnn"):
+    os.mkdir("cnn")
+test_train.save("cnn\{}".format('test_train_{}{}'.format(test_eval[0],test_eval[1])))
+
 
 #plot accuracy and loss between training and validation
+#TODO save off the plots and associate with the model
 accuracy = test_train.history['accuracy']
 val_accuracy = test_train.history['val_accuracy']
 loss = test_train.history['loss']
